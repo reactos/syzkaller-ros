@@ -23,12 +23,12 @@ import (
 )
 
 type Env struct {
+	StatExecs    uint64
+	StatRestarts uint64
+
 	bin    []string
 	pid    int
 	config Config
-
-	StatExecs    uint64
-	StatRestarts uint64
 }
 
 func MakeEnv(bin string, pid int, config Config) (*Env, error) {
