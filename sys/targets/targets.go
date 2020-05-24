@@ -77,6 +77,9 @@ var List = map[string]map[string]*Target{
 			PtrSize: 8,
 			CArch:   []string{"_M_X64"},
 		},
+		"386": {
+			PtrSize: 4,
+		},
 	},
 }
 
