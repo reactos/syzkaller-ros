@@ -10,6 +10,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -82,16 +83,22 @@ func (env *Env) Exec(opts *ExecOpts, p *prog.Prog) (output []byte, info []CallIn
 	binary.Write(inbuf, binary.LittleEndian, uint64(opts.Flags))
 	binary.Write(inbuf, binary.LittleEndian, uint64(env.pid))
 	inbuf.Write(data)
-
 	cmd := exec.Command(env.bin[0], env.bin[1:]...)
 	cmd.Env = []string{}
 	cmd.Dir = dir
 	cmd.Stdin = inbuf
+	var stdout, stderr bytes.Buffer
 	if env.config.Flags&FlagDebug != 0 {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stdout
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
 	}
-	if err := cmd.Start(); err != nil {
+	err1 := cmd.Run()
+	if err1 != nil {
+		log.Fatalf("cmd.Run() failed with %s\n", err1)
+	}
+	outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+	fmt.Printf("out:\n%s\nerr:\n%s\n", outStr, errStr)
+	/*if err := cmd.Start(); err != nil {
 		err0 = err
 		return
 	}
@@ -106,6 +113,6 @@ func (env *Env) Exec(opts *ExecOpts, p *prog.Prog) (output []byte, info []CallIn
 	case <-t.C:
 		cmd.Process.Kill()
 		<-done
-	}
+	}*/
 	return
 }
