@@ -42,7 +42,19 @@ Detailed instructions can be found here : [ReactOS-wiki](https://reactos.org/wik
     ```sh
     git clone https://github.com/reactos/syzkaller
     ```
+2. Instal Go version 1.10
+    ```
+    https://golang.org/dl/
+    ```
+3. Make a copy of above cloned sources in the go path as follows.
+    ```
+    $GOPATH/src/github.com/google/syzkaller
+    ```
+ ---
+**NOTE:**
+The above step is required since we are using an older commit of current master.
 
+---   
 2. Building Syz-Stress.
     ```sh
     cd tools/syz-stress/
@@ -58,7 +70,12 @@ Detailed instructions can be found here : [ReactOS-wiki](https://reactos.org/wik
     Synchronization.lib Shell32.lib Rpcns4.lib Mswsock.lib  Mincore.lib \
     Msimg32.lib RpcRT4.lib Rpcrt4.lib lz32.lib
     ```
+ ---
+**NOTE:**
+Alternatively you an download the latest build of syz-executor form here: 
+https://github.com/reactos/syzkaller/actions
 
+--- 
 ## Running Syzkaller
 
 Copy over Syz-stress and executor to the VM and place them in the same folder. Open a command prompt, change to the directory and use the following command to start fuzzing.
@@ -68,6 +85,6 @@ Copy over Syz-stress and executor to the VM and place them in the same folder. O
 ## TODO 
 
 - [ ] Add more descriptions
-- [ ] Makefile
+- [ ] push to syzkaller master
 - [ ] Syz-manager 
 - [ ] Syzbot
