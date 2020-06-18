@@ -1,0 +1,23 @@
+name: Build
+on: [push]
+
+jobs:
+  build-msvc-i386:
+    name: MSVC (i386)
+    runs-on: windows-latest
+    steps: 
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with :
+        arch: amd64_x86
+    - uses: actions/checkout@v2
+      with:
+        path: src
+    - name: Build executor
+      run: |
+        cl src/executor/executor_windows.cc -o src/executor/syz-executor.exe kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib rpcrt4.lib Crypt32.lib imm32.lib Urlmon.lib Oleaut32.lib Winscard.lib Opengl32.lib Mpr.lib Ws2_32.lib Bcrypt.lib Ncrypt.lib Synchronization.lib Shell32.lib Rpcns4.lib Mswsock.lib  Mincore.lib Msimg32.lib RpcRT4.lib Rpcrt4.lib lz32.lib
+    - name: Upload executor
+      uses: actions/upload-artifact@v1
+      with:
+        name: syz-executor.exe
+        path: src/executor/syz-executor.exe
