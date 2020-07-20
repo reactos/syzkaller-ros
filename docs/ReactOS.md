@@ -4,7 +4,7 @@ Instructions to set up syzkaller for ReactOS.
 
 ## Getting ReactOS
 
-1. Download the MSVC(i386) build of ReactOS that supports Syzkaller binaries from Github actions page :
+1. Download the MSVC(i386) build of ReactOS that supports Syzkaller binaries from Github actions page:
     ```
     https://github.com/reactos/reactos/pull/2930/checks
 
