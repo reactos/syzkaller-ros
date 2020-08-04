@@ -1,32 +1,87 @@
-# syzkaller - linux kernel fuzzer
+# syzkaller - unsupervised coverage-guided kernel fuzzer
 
-[![Build Status](https://travis-ci.org/google/syzkaller.svg?branch=master)](https://travis-ci.org/google/syzkaller)
+Instructions to set up syzkaller for ReactOS.
 
-`syzkaller` is an unsupervised coverage-guided Linux kernel fuzzer.
+## Getting ReactOS
 
-The project mailing list is [syzkaller@googlegroups.com](https://groups.google.com/forum/#!forum/syzkaller).
-You can subscribe to it with a google account or by sending an email to syzkaller+subscribe@googlegroups.com.
+1. Download the MSVC(i386) build of ReactOS that supports Syzkaller binaries from Github actions page :
+    ```
+    https://github.com/reactos/reactos/pull/2930/checks
+    ```
+2. Optionally you can build it yourself by cloning the my fork for ReactOS checking out the Syzkaller branch.
 
-[List of found bugs](docs/found_bugs.md).
+    ```
+    https://github.com/Freakston/reactos/tree/syzkaller
+    
+    https://reactos.org/wiki/Building_ReactOS
+    ```
 
-## Documentation
+## Setting up ReactOS on qemu
 
-- [How to install syzkaller](docs/setup.md)
-- [How to use syzkaller](docs/usage.md)
-- [How syzkaller works](docs/internals.md)
-- [How to contribute to syzkaller](docs/contributing.md)
-- [How to report Linux kernel bugs](docs/linux_kernel_reporting_bugs.md)
+1. Create the qemu image using the following command
+    ```sh
+    qemu-img create -f qcow2 ReactOS.img 8192M
+    ```
+    Here 8192M is the size of image.
 
-## External Articles
+2. Boot and install
+    ```
+    qemu -L . -m 1024 -cdrom ReactOS.iso -hda ReactOS.img -boot d -localtime -serial file:ReactOS.log
+    ```
+    Here we are creating a machine with 1Gb of RAM.
+---
+**NOTE:**
+Detailed instructions can be found here : [ReactOS-wiki](https://reactos.org/wiki/QEMU)
 
- - [Kernel QA with syzkaller and qemu](https://github.com/hardenedlinux/Debian-GNU-Linux-Profiles/blob/master/docs/harbian_qa/fuzz_testing/syzkaller_general.md) (tutorial on how to setup syzkaller with qemu)
- - [Syzkaller crash DEMO](https://github.com/hardenedlinux/Debian-GNU-Linux-Profiles/blob/master/docs/harbian_qa/fuzz_testing/syzkaller_crash_demo.md) (tutorial on how to extend syzkaller with new syscalls)
- - [Coverage-guided kernel fuzzing with syzkaller](https://lwn.net/Articles/677764/) (by David Drysdale)
- - [ubsan, kasan, syzkaller und co](http://www.strlen.de/talks/debug-w-syzkaller.pdf) ([video](https://www.youtube.com/watch?v=Acp0A9X1254)) (by Florian Westphal)
- - [Debugging a kernel crash found by syzkaller](http://vegardno.blogspot.de/2016/08/sync-debug.html) (by Quentin Casasnovas)
- - [Linux Plumbers 2016 talk slides](https://docs.google.com/presentation/d/1iAuTvzt_xvDzS2misXwlYko_VDvpvCmDevMOq2rXIcA/edit?usp=sharing)
- - [syzkaller: the next gen kernel fuzzer](https://www.slideshare.net/DmitryVyukov/syzkaller-the-next-gen-kernel-fuzzer) (basics of operations, tutorial on how to run syzkaller and how to extend it to fuzz new drivers)
+---
+
+
+## Building Syzkaller
+
+1. Clone the fork of Syzkaller that has support for ReactOS.
+    ```sh
+    git clone https://github.com/reactos/syzkaller
+    ```
+2. Instal Go version 1.10
+    ```
+    https://golang.org/dl/
+    ```
+3. Make a copy of above cloned sources in the go path as follows.
+    ```
+    $GOPATH/src/github.com/google/syzkaller
+    ```
+ ---
+**NOTE:**
+The above step is required since we are using an older commit of current master.
+
+---   
+2. Building Syz-Stress.
+    ```sh
+    cd tools/syz-stress/
+    GOOS=windows GOARCH=386 go build -o syz-stress.exe stress.go
+    ```
+3. Syz-executor  (assumes **cl** cross-compiler is in PATH, preferably MSVC)
+    ```
+    cl executor\executor_windows.cc -o syz-executor.exe \
+    kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib \
+    shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib \
+    winmm.lib rpcrt4.lib Crypt32.lib imm32.lib Urlmon.lib Oleaut32.lib \
+    Winscard.lib Opengl32.lib Mpr.lib Ws2_32.lib Bcrypt.lib Ncrypt.lib \
+    Synchronization.lib Shell32.lib Rpcns4.lib Mswsock.lib  Mincore.lib \
+    Msimg32.lib RpcRT4.lib Rpcrt4.lib lz32.lib
+    ```
+ ---
+**NOTE:**
+Alternatively you an download the latest build of syz-executor form here: 
+https://github.com/reactos/syzkaller/actions
+
+--- 
+## Running Syzkaller
+
+Copy over Syz-stress and executor to the VM and place them in the same folder. Open a command prompt, change to the directory and use the following command to start fuzzing.
+    
+    syz-stress.exe -threaded=0
 
 ## Disclaimer
 
-This is not an official Google product.
+**This is not the official Repo** [Official](https://github.com/google/syzkaller)
